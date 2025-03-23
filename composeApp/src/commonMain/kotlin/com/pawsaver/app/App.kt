@@ -12,6 +12,7 @@ import com.pawsaver.app.ui.AppTheme
 import com.pawsaver.app.ui.screens.ForgotPasswordScreen
 import com.pawsaver.app.ui.screens.SignInScreen
 import com.pawsaver.app.ui.screens.SignUpScreen
+import com.pawsaver.app.ui.screens.VerifyEmailScreen
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinContext
 import org.koin.compose.currentKoinScope
@@ -58,6 +59,9 @@ fun App() {
                 }
                 composable(route = "forgot_password") {
                     ForgotPasswordScreen(navController)
+                }
+                composable(route = "verify_email") {
+                    VerifyEmailScreen(navController)
                 }
             }
         }

@@ -174,7 +174,7 @@ fun SignUpScreen(navController: NavHostController) {
             )
 
             Button(
-                onClick = { },
+                onClick = { navController.navigate("verify_email") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
