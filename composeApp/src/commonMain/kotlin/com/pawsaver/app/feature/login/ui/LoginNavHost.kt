@@ -99,8 +99,7 @@ fun NavGraphBuilder.loginRouting(navController: NavHostController) {
     }
 
     composable<LoginRouting.NewPassword> { backStackEntry ->
-        val encodedPk = backStackEntry.toRoute<LoginRouting.NewPassword>().encodedPk
-        val resetToken = backStackEntry.toRoute<LoginRouting.NewPassword>().resetToken
+        val (encodedPk, resetToken) = backStackEntry.toRoute<LoginRouting.NewPassword>()
         NewPasswordScreen(
             encodedPk = encodedPk,
             resetToken = resetToken,
