@@ -6,39 +6,42 @@ import co.touchlab.kermit.Logger
 import com.pawsaver.app.core.data.ApiData
 import com.pawsaver.app.core.data.CustomApiException
 import com.pawsaver.app.core.network.PawsaverApi
-import com.pawsaver.app.feature.login.data.VerifyEmailResponse
+import com.pawsaver.app.feature.login.data.UserSignUpResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class VerifyEmailScreenViewModel(
+class UserSignUpScreenViewModel(
     private val pawsaverApi: PawsaverApi
 ) : ViewModel() {
 
-    private val _verifyState: MutableStateFlow<VerifyScreenState> =
-        MutableStateFlow(VerifyScreenState.Idle)
-    val verifyState = _verifyState.asStateFlow()
+    private val _userSignUpState: MutableStateFlow<UserSignUpScreenState> =
+        MutableStateFlow(UserSignUpScreenState.Idle)
+    val userSignUpState = _userSignUpState.asStateFlow()
 
-    sealed class VerifyScreenState {
-        data object Idle : VerifyScreenState()
-        data object Loading : VerifyScreenState()
-        data class Error(val error: ApiData.Error) : VerifyScreenState()
-        data class Success(val response: VerifyEmailResponse) : VerifyScreenState()
+    sealed class UserSignUpScreenState {
+        data object Idle : UserSignUpScreenState()
+        data object Loading : UserSignUpScreenState()
+        data class Error(val error: ApiData.Error) : UserSignUpScreenState()
+        data class Success(val user: UserSignUpResponse) : UserSignUpScreenState()
     }
 
-    fun verifyEmail(
+    fun userSignUp(
+        firstName: String,
+        lastName: String,
         email: String,
-        code: String
+        password: String,
+        phone: String
     ) {
         viewModelScope.launch {
-            _verifyState.update { VerifyScreenState.Loading }
-            pawsaverApi.verify(
-                email, code
+            _userSignUpState.update { UserSignUpScreenState.Loading }
+            pawsaverApi.registerUser(
+                firstName, lastName, email, password, phone
             )
                 .onSuccess { response ->
-                    Logger.d("Verified email successfully: ${response.data}")
-                    _verifyState.update { VerifyScreenState.Success(response.data) }
+                    Logger.d("Sign-up successful: ${response.data}")
+                    _userSignUpState.update { UserSignUpScreenState.Success(response.data) }
                 }
                 .onFailure { e ->
                     val error = when (e) {
@@ -53,14 +56,14 @@ class VerifyEmailScreenViewModel(
                         )
                     }
                     Logger.e("Sign-up failed: $error", e)
-                    _verifyState.update { VerifyScreenState.Error(error) }
+                    _userSignUpState.update { UserSignUpScreenState.Error(error) }
                 }
         }
     }
 
     fun resetState() {
-        _verifyState.update {
-            VerifyScreenState.Idle
+        _userSignUpState.update {
+            UserSignUpScreenState.Idle
         }
     }
 }

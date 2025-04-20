@@ -4,26 +4,36 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed class ApiData<T, E : ApiData.Error> {
+sealed class ApiData<T> {
     @Serializable
     data class Request<T>(
         val data: T
-    ) : ApiData<T, Error>()
+    ) : ApiData<T>()
 
     @Serializable
     data class Response<T>(
         val data: T
-    ) : ApiData<T, Error>()
+    ) : ApiData<T>()
 
     @Serializable
-    abstract class Error : ApiData<Nothing, Error>() {
-        @SerialName("non_field_errors")
-        protected abstract val _genericErrors: List<String>?
+    data class Error(
+        @SerialName("errors")
+        private val _apiErrors: List<ApiError>? = null
+    ) : ApiData<Nothing>() {
+        @Serializable
+        data class ApiError(
+            val identifier: String,
+            val message: String
+        )
 
-        // Public property with default value
-        val value: String
-            get() = _genericErrors?.firstOrNull() ?: "An unexpected error occurred"
+        val apiErrors: List<ApiError>
+            get() = _apiErrors ?: listOf(
+                ApiError(
+                    identifier = "unknown",
+                    message = "An unexpected error occurred"
+                )
+            )
     }
 }
 
-class CustomApiException(val error: ApiData.Error) : Exception(error.value)
+class CustomApiException(val error: ApiData.Error) : Exception(error.apiErrors.first().message)

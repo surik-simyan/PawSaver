@@ -3,10 +3,9 @@ package com.pawsaver.app.feature.login.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
+import com.pawsaver.app.core.data.ApiData
 import com.pawsaver.app.core.data.CustomApiException
 import com.pawsaver.app.core.network.PawsaverApi
-import com.pawsaver.app.core.utils.errorOrNull
-import com.pawsaver.app.feature.login.data.SignInError
 import com.pawsaver.app.feature.login.data.SignInResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +23,7 @@ class SignInScreenViewModel(
     sealed class SignInScreenState {
         data object Idle : SignInScreenState()
         data object Loading : SignInScreenState()
-        data class Error(val error: SignInError) : SignInScreenState()
+        data class Error(val error: ApiData.Error) : SignInScreenState()
         data class Success(val user: SignInResponse) : SignInScreenState()
     }
 
@@ -38,8 +37,15 @@ class SignInScreenViewModel(
                 }
                 .onFailure { e ->
                     val error = when (e) {
-                        is CustomApiException -> e.error as SignInError
-                        else -> SignInError(_genericErrors = e.errorOrNull())
+                        is CustomApiException -> e.error
+                        else -> ApiData.Error(
+                            _apiErrors = listOf(
+                                ApiData.Error.ApiError(
+                                    identifier = "unknown",
+                                    message = e.message ?: ""
+                                )
+                            )
+                        )
                     }
                     Logger.e("Sign-in failed: $error", e)
                     _signInState.update { SignInScreenState.Error(error) }

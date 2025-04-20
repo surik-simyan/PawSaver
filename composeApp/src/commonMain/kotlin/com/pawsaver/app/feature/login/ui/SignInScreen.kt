@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -32,6 +31,7 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,21 +46,25 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.pawsaver.app.core.ui.components.MinimalDialog
-import com.pawsaver.app.core.utils.firstOrBlank
+import com.pawsaver.app.core.utils.checkFieldErrors
 import com.pawsaver.app.core.utils.inputFieldPaddings
-import com.pawsaver.app.core.utils.isNotNullOrEmpty
 import com.pawsaver.app.core.utils.koinViewModel
 import com.pawsaver.app.core.utils.toErrorText
+import com.russhwolf.settings.Settings
+import com.russhwolf.settings.get
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 
 @Composable
 fun SignInScreen(
     onNavigateToForgotPassword: () -> Unit,
-    onNavigateToSignUp: () -> Unit,
+    onNavigateToUserSignUp: () -> Unit,
+    onNavigateToShelterSignUp: () -> Unit,
     onNavigateToHomeScreen: () -> Unit,
 ) {
     val viewModel = koinViewModel<SignInScreenViewModel>()
     val signInState by viewModel.signInState.collectAsState()
+    val settings: Settings = koinInject<Settings>()
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val email = remember { mutableStateOf("") }
@@ -163,7 +167,7 @@ fun SignInScreen(
             Spacer(modifier = Modifier.weight(1.0f))
 
             Button(
-                onClick = onNavigateToSignUp,
+                onClick = onNavigateToUserSignUp,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
             ) {
                 Text("SIGN UP")
@@ -172,7 +176,7 @@ fun SignInScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(
-                onClick = { },
+                onClick = onNavigateToShelterSignUp,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
             ) {
                 Text("SIGN UP AS SHELTER")
@@ -193,14 +197,18 @@ fun SignInScreen(
             SignInScreenViewModel.SignInScreenState.Loading -> MinimalDialog("Loading", true)
             is SignInScreenViewModel.SignInScreenState.Error -> {
                 val error = (signInState as SignInScreenViewModel.SignInScreenState.Error).error
-                if (error.email.isNotNullOrEmpty() || error.password.isNotNullOrEmpty()) {
-                    emailError.value = error.email.firstOrBlank()
-                    passwordError.value = error.password.firstOrBlank()
-                } else {
-                    emailError.value = ""
-                    passwordError.value = ""
+
+                emailError.value = ""
+                passwordError.value = ""
+
+                error.checkFieldErrors(
+                    mapOf(
+                        "email" to emailError,
+                        "password" to passwordError,
+                    )
+                ) { message ->
                     scope.launch {
-                        val result = snackbarHostState.showSnackbar(error.value)
+                        val result = snackbarHostState.showSnackbar(message)
                         if (result == SnackbarResult.Dismissed) {
                             viewModel.resetState()
                         }
@@ -209,6 +217,11 @@ fun SignInScreen(
             }
 
             is SignInScreenViewModel.SignInScreenState.Success -> {
+                if (rememberMe.value) {
+                    val user = (signInState as SignInScreenViewModel.SignInScreenState.Success).user
+                    settings.putString("access", user.access)
+                    settings.putString("refresh", user.refresh)
+                }
                 viewModel.resetState()
                 onNavigateToHomeScreen()
             }

@@ -9,10 +9,22 @@ import kotlinx.serialization.Serializable
 sealed interface LoginRouting {
     @Serializable
     data object SignIn : LoginRouting
+
     @Serializable
-    data object SignUp : LoginRouting
+    data object UserSignUp : LoginRouting
+
+    @Serializable
+    data object ShelterSignUp : LoginRouting
+
     @Serializable
     data object ForgotPassword : LoginRouting
+
+    @Serializable
+    data class ResetPassword(val encodedPk: String) : LoginRouting
+
+    @Serializable
+    data class NewPassword(val encodedPk: String, val resetToken: String) : LoginRouting
+
     @Serializable
     data class VerifyEmail(val email: String) : LoginRouting
 }
@@ -21,7 +33,8 @@ fun NavGraphBuilder.loginRouting(navController: NavHostController) {
     composable<LoginRouting.SignIn> {
         SignInScreen(
             onNavigateToForgotPassword = { navController.navigate(LoginRouting.ForgotPassword) },
-            onNavigateToSignUp = { navController.navigate(LoginRouting.SignUp) },
+            onNavigateToUserSignUp = { navController.navigate(LoginRouting.UserSignUp) },
+            onNavigateToShelterSignUp = { navController.navigate(LoginRouting.ShelterSignUp) },
             onNavigateToHomeScreen = {
                 navController.navigate("main") {
                     popUpTo(navController.graph.startDestinationId) {
@@ -32,8 +45,8 @@ fun NavGraphBuilder.loginRouting(navController: NavHostController) {
         )
     }
 
-    composable<LoginRouting.SignUp> {
-        SignUpScreen(
+    composable<LoginRouting.UserSignUp> {
+        UserSignUpScreen(
             onNavigateBack = { navController.navigateUp() },
             onNavigateVerifyEmail = { email ->
                 navController.navigate(LoginRouting.VerifyEmail(email))
@@ -41,9 +54,12 @@ fun NavGraphBuilder.loginRouting(navController: NavHostController) {
         )
     }
 
-    composable<LoginRouting.ForgotPassword> {
-        ForgotPasswordScreen(
-            onNavigateBack = { navController.navigateUp() }
+    composable<LoginRouting.ShelterSignUp> {
+        ShelterSignUpScreen(
+            onNavigateBack = { navController.navigateUp() },
+            onNavigateVerifyEmail = { email ->
+                navController.navigate(LoginRouting.VerifyEmail(email))
+            }
         )
     }
 
@@ -58,6 +74,38 @@ fun NavGraphBuilder.loginRouting(navController: NavHostController) {
                         inclusive = true
                     }
                 }
+            }
+        )
+    }
+
+    composable<LoginRouting.ForgotPassword> {
+        ForgotPasswordScreen(
+            onNavigateBack = { navController.navigateUp() },
+            onNavigateToResetPassword = { encodedPk ->
+                navController.navigate(LoginRouting.ResetPassword(encodedPk))
+            }
+        )
+    }
+
+    composable<LoginRouting.ResetPassword> { backStackEntry ->
+        val encodedPk = backStackEntry.toRoute<LoginRouting.ResetPassword>().encodedPk
+        ResetPasswordScreen(
+            encodedPk = encodedPk,
+            onNavigateBack = { navController.navigateUp() },
+            onNavigateToNewPassword = { resetToken ->
+                navController.navigate(LoginRouting.NewPassword(encodedPk, resetToken))
+            }
+        )
+    }
+
+    composable<LoginRouting.NewPassword> { backStackEntry ->
+        val encodedPk = backStackEntry.toRoute<LoginRouting.NewPassword>().encodedPk
+        val resetToken = backStackEntry.toRoute<LoginRouting.NewPassword>().resetToken
+        NewPasswordScreen(
+            encodedPk = encodedPk,
+            resetToken = resetToken,
+            onNavigateBack = {
+                navController.popBackStack(LoginRouting.SignIn, inclusive = false)
             }
         )
     }

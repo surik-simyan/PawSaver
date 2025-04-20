@@ -1,27 +1,24 @@
 package com.pawsaver.app.feature.login.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -37,36 +34,28 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.pawsaver.app.core.ui.components.MinimalDialog
-import com.pawsaver.app.core.utils.firstOrBlank
+import com.pawsaver.app.core.utils.checkFieldErrors
 import com.pawsaver.app.core.utils.inputFieldPaddings
-import com.pawsaver.app.core.utils.isNotNullOrEmpty
 import com.pawsaver.app.core.utils.koinViewModel
 import com.pawsaver.app.core.utils.toErrorText
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignUpScreen(
+fun NewPasswordScreen(
+    encodedPk: String,
+    resetToken: String,
     onNavigateBack: () -> Unit,
-    onNavigateVerifyEmail: (email: String) -> Unit,
 ) {
-    val viewModel = koinViewModel<SignUpScreenViewModel>()
-    val signUpState by viewModel.signUpState.collectAsState()
+    val viewModel = koinViewModel<NewPasswordScreenViewModel>()
+    val newPasswordState by viewModel.newPasswordState.collectAsState()
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    val firstName = remember { mutableStateOf("") }
-    val firstNameError = remember { mutableStateOf("") }
-    val lastName = remember { mutableStateOf("") }
-    val lastNameError = remember { mutableStateOf("") }
-    val email = remember { mutableStateOf("") }
-    val emailError = remember { mutableStateOf("") }
-    val phone = remember { mutableStateOf("") }
-    val phoneError = remember { mutableStateOf("") }
     val password = remember { mutableStateOf("") }
     val passwordError = remember { mutableStateOf("") }
     var showPassword by remember { mutableStateOf(false) }
@@ -75,26 +64,6 @@ fun SignUpScreen(
     var showVerifyPassword by remember { mutableStateOf(false) }
 
     Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = "Sign Up",
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = onNavigateBack,
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Localized description"
-                        )
-                    }
-                }
-            )
-        },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
         },
@@ -106,56 +75,22 @@ fun SignUpScreen(
                 .padding(innerPadding),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(CircleShape)
+                    .align(Alignment.CenterHorizontally),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("Icon")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             Text("Placeholder for blurred text")
             Text("Additional placeholder for more blurred text")
 
-            OutlinedTextField(
-                value = firstName.value,
-                onValueChange = { firstName.value = it },
-                modifier = Modifier.fillMaxWidth().inputFieldPaddings(),
-                label = { Text("First name") },
-                leadingIcon = { Icon(Icons.Default.Person, contentDescription = "First name") },
-                singleLine = true,
-                isError = firstNameError.value.isNotBlank(),
-                supportingText = { firstNameError.value.toErrorText() },
-            )
-
-            OutlinedTextField(
-                value = lastName.value,
-                onValueChange = { lastName.value = it },
-                modifier = Modifier.fillMaxWidth().inputFieldPaddings(),
-                label = { Text("Last name") },
-                leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Last name") },
-                singleLine = true,
-                isError = lastNameError.value.isNotBlank(),
-                supportingText = { lastNameError.value.toErrorText() },
-            )
-
-            OutlinedTextField(
-                value = email.value,
-                onValueChange = { email.value = it },
-                modifier = Modifier.fillMaxWidth().inputFieldPaddings(),
-                label = { Text("Email") },
-                leadingIcon = { Icon(Icons.Default.Email, contentDescription = "Email") },
-                singleLine = true,
-                isError = emailError.value.isNotBlank(),
-                supportingText = { emailError.value.toErrorText() },
-            )
-
-            OutlinedTextField(
-                value = "+${phone.value}",
-                onValueChange = { newInput ->
-                    // Keep only digits and update the state
-                    phone.value = newInput.filter { it.isDigit() }
-                },
-                modifier = Modifier.fillMaxWidth().inputFieldPaddings(),
-                label = { Text("Phone") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                leadingIcon = { Icon(Icons.Default.Phone, contentDescription = "Phone") },
-                singleLine = true,
-                isError = phoneError.value.isNotBlank(),
-                supportingText = { phoneError.value.toErrorText() },
-            )
+            Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
                 value = password.value,
@@ -219,49 +154,44 @@ fun SignUpScreen(
                 supportingText = { verifyPasswordError.value.toErrorText() },
             )
 
+            Spacer(modifier = Modifier.height(16.dp))
+
             Button(
                 onClick = {
                     if (verifyPasswordError.value.isBlank()) {
-                        viewModel.signUp(
-                            firstName.value,
-                            lastName.value,
-                            email.value,
+                        viewModel.setNewPassword(
                             password.value,
-                            phone.value
+                            encodedPk,
+                            resetToken
                         )
                     }
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
             ) {
-                Text("SIGN UP")
+                Text("SET NEW PASSWORD")
             }
         }
 
-        when (signUpState) {
-            SignUpScreenViewModel.SignUpScreenState.Idle -> Unit
-            SignUpScreenViewModel.SignUpScreenState.Loading -> MinimalDialog(
+        when (newPasswordState) {
+
+            NewPasswordScreenViewModel.NewPasswordScreenState.Idle -> Unit
+            NewPasswordScreenViewModel.NewPasswordScreenState.Loading -> MinimalDialog(
                 "Loading",
                 true
             )
 
-            is SignUpScreenViewModel.SignUpScreenState.Error -> {
-                val error = (signUpState as SignUpScreenViewModel.SignUpScreenState.Error).error
-                if (error.hasNonGenericErrors()) {
-                    firstNameError.value = error.firstName.firstOrBlank()
-                    emailError.value = error.email.firstOrBlank()
-                    lastNameError.value = error.lastName.firstOrBlank()
-                    phoneError.value = error.phone.firstOrBlank()
-                    passwordError.value = error.password.firstOrBlank()
-                } else {
-                    firstNameError.value = ""
-                    lastNameError.value = ""
-                    emailError.value = ""
-                    phoneError.value = ""
-                    passwordError.value = ""
+            is NewPasswordScreenViewModel.NewPasswordScreenState.Error -> {
+                val error = (newPasswordState as NewPasswordScreenViewModel.NewPasswordScreenState.Error).error
+
+                passwordError.value = ""
+
+                error.checkFieldErrors(
+                    mapOf(
+                        "new_password" to passwordError,
+                    )
+                ) { message ->
                     scope.launch {
-                        val result = snackbarHostState.showSnackbar(error.value)
+                        val result = snackbarHostState.showSnackbar(message)
                         if (result == SnackbarResult.Dismissed) {
                             viewModel.resetState()
                         }
@@ -269,9 +199,9 @@ fun SignUpScreen(
                 }
             }
 
-            is SignUpScreenViewModel.SignUpScreenState.Success -> {
+            is NewPasswordScreenViewModel.NewPasswordScreenState.Success -> {
                 viewModel.resetState()
-                onNavigateVerifyEmail(email.value)
+                onNavigateBack()
             }
         }
     }

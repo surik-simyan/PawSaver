@@ -6,39 +6,41 @@ import co.touchlab.kermit.Logger
 import com.pawsaver.app.core.data.ApiData
 import com.pawsaver.app.core.data.CustomApiException
 import com.pawsaver.app.core.network.PawsaverApi
-import com.pawsaver.app.feature.login.data.VerifyEmailResponse
+import com.pawsaver.app.feature.login.data.NewPasswordResponse
+import com.pawsaver.app.feature.login.data.UserSignUpResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class VerifyEmailScreenViewModel(
+class NewPasswordScreenViewModel(
     private val pawsaverApi: PawsaverApi
 ) : ViewModel() {
 
-    private val _verifyState: MutableStateFlow<VerifyScreenState> =
-        MutableStateFlow(VerifyScreenState.Idle)
-    val verifyState = _verifyState.asStateFlow()
+    private val _newPasswordState: MutableStateFlow<NewPasswordScreenState> =
+        MutableStateFlow(NewPasswordScreenState.Idle)
+    val newPasswordState = _newPasswordState.asStateFlow()
 
-    sealed class VerifyScreenState {
-        data object Idle : VerifyScreenState()
-        data object Loading : VerifyScreenState()
-        data class Error(val error: ApiData.Error) : VerifyScreenState()
-        data class Success(val response: VerifyEmailResponse) : VerifyScreenState()
+    sealed class NewPasswordScreenState {
+        data object Idle : NewPasswordScreenState()
+        data object Loading : NewPasswordScreenState()
+        data class Error(val error: ApiData.Error) : NewPasswordScreenState()
+        data class Success(val user: NewPasswordResponse) : NewPasswordScreenState()
     }
 
-    fun verifyEmail(
-        email: String,
-        code: String
+    fun setNewPassword(
+        newPassword: String,
+        encodedPk: String,
+        resetToken: String
     ) {
         viewModelScope.launch {
-            _verifyState.update { VerifyScreenState.Loading }
-            pawsaverApi.verify(
-                email, code
+            _newPasswordState.update { NewPasswordScreenState.Loading }
+            pawsaverApi.setNewPassword(
+                newPassword, encodedPk, resetToken
             )
                 .onSuccess { response ->
-                    Logger.d("Verified email successfully: ${response.data}")
-                    _verifyState.update { VerifyScreenState.Success(response.data) }
+                    Logger.d("Sign-up successful: ${response.data}")
+                    _newPasswordState.update { NewPasswordScreenState.Success(response.data) }
                 }
                 .onFailure { e ->
                     val error = when (e) {
@@ -53,14 +55,14 @@ class VerifyEmailScreenViewModel(
                         )
                     }
                     Logger.e("Sign-up failed: $error", e)
-                    _verifyState.update { VerifyScreenState.Error(error) }
+                    _newPasswordState.update { NewPasswordScreenState.Error(error) }
                 }
         }
     }
 
     fun resetState() {
-        _verifyState.update {
-            VerifyScreenState.Idle
+        _newPasswordState.update {
+            NewPasswordScreenState.Idle
         }
     }
 }

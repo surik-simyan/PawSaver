@@ -60,13 +60,13 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun VerifyEmailScreen(
-    email: String,
+fun ResetPasswordScreen(
+    encodedPk: String,
+    onNavigateToNewPassword: (resetToken: String) -> Unit,
     onNavigateBack: () -> Unit,
-    onNavigateToHomeScreen: () -> Unit,
 ) {
-    val viewModel = koinViewModel<VerifyEmailScreenViewModel>()
-    val verifyState by viewModel.verifyState.collectAsState()
+    val viewModel = koinViewModel<ResetPasswordScreenViewModel>()
+    val resetPasswordState by viewModel.resetPasswordState.collectAsState()
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val verificationCode = remember { mutableStateOf("") }
@@ -77,7 +77,7 @@ fun VerifyEmailScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Verify Email",
+                        text = "Reset Password",
                         modifier = Modifier.fillMaxWidth()
                     )
                 },
@@ -221,7 +221,7 @@ fun VerifyEmailScreen(
             // Verify email button
             Button(
                 onClick = {
-                    viewModel.verifyEmail(email, verificationCode.value)
+                    viewModel.resetPassword(verificationCode.value, encodedPk)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -232,15 +232,15 @@ fun VerifyEmailScreen(
         }
     }
 
-    when (verifyState) {
-        VerifyEmailScreenViewModel.VerifyScreenState.Idle -> Unit
-        VerifyEmailScreenViewModel.VerifyScreenState.Loading -> MinimalDialog(
+    when (resetPasswordState) {
+        ResetPasswordScreenViewModel.ResetPasswordState.Idle -> Unit
+        ResetPasswordScreenViewModel.ResetPasswordState.Loading -> MinimalDialog(
             "Loading",
             true
         )
 
-        is VerifyEmailScreenViewModel.VerifyScreenState.Error -> {
-            val error = (verifyState as VerifyEmailScreenViewModel.VerifyScreenState.Error).error
+        is ResetPasswordScreenViewModel.ResetPasswordState.Error -> {
+            val error = (resetPasswordState as ResetPasswordScreenViewModel.ResetPasswordState.Error).error
             scope.launch {
                 val result = snackbarHostState.showSnackbar(error.apiErrors.first().message)
                 if (result == SnackbarResult.Dismissed) {
@@ -249,13 +249,10 @@ fun VerifyEmailScreen(
             }
         }
 
-        is VerifyEmailScreenViewModel.VerifyScreenState.Success -> {
-            val message = (verifyState as VerifyEmailScreenViewModel.VerifyScreenState.Success).response.message
-            scope.launch {
-                snackbarHostState.showSnackbar(message)
-            }
+        is ResetPasswordScreenViewModel.ResetPasswordState.Success -> {
+            val resetToken = (resetPasswordState as ResetPasswordScreenViewModel.ResetPasswordState.Success).response.resetToken
+            onNavigateToNewPassword(resetToken)
             viewModel.resetState()
-            onNavigateToHomeScreen()
         }
     }
 }

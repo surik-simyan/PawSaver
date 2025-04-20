@@ -3,14 +3,19 @@ package com.pawsaver.app.core.network
 import com.pawsaver.app.BuildKonfig
 import com.pawsaver.app.core.data.ApiData
 import com.pawsaver.app.core.data.CustomApiException
+import com.pawsaver.app.feature.login.data.ForgotPasswordBody
+import com.pawsaver.app.feature.login.data.ForgotPasswordResponse
+import com.pawsaver.app.feature.login.data.NewPasswordBody
+import com.pawsaver.app.feature.login.data.NewPasswordResponse
+import com.pawsaver.app.feature.login.data.ResetPasswordBody
+import com.pawsaver.app.feature.login.data.ResetPasswordResponse
+import com.pawsaver.app.feature.login.data.ShelterSignUpBody
+import com.pawsaver.app.feature.login.data.ShelterSignUpResponse
 import com.pawsaver.app.feature.login.data.SignInBody
-import com.pawsaver.app.feature.login.data.SignInError
 import com.pawsaver.app.feature.login.data.SignInResponse
-import com.pawsaver.app.feature.login.data.SignUpBody
-import com.pawsaver.app.feature.login.data.SignUpError
-import com.pawsaver.app.feature.login.data.SignUpResponse
+import com.pawsaver.app.feature.login.data.UserSignUpBody
+import com.pawsaver.app.feature.login.data.UserSignUpResponse
 import com.pawsaver.app.feature.login.data.VerifyEmailBody
-import com.pawsaver.app.feature.login.data.VerifyEmailError
 import com.pawsaver.app.feature.login.data.VerifyEmailResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -46,7 +51,7 @@ class PawsaverApi {
         }
     }
 
-    private suspend inline fun <reified T, reified E : ApiData.Error> safeApiCall(
+    private suspend inline fun <reified T> safeApiCall(
         crossinline apiCall: suspend () -> HttpResponse
     ): Result<ApiData.Response<T>> {
         return try {
@@ -55,11 +60,11 @@ class PawsaverApi {
                 val successData = response.body<T>()
                 Result.success(ApiData.Response(successData))
             } else {
-                val errorBody = response.body<E>()
+                val errorBody = response.body<ApiData.Error>()
                 Result.failure(CustomApiException(errorBody))
             }
         } catch (e: ClientRequestException) {
-            val errorBody = e.response.body<E>()
+            val errorBody = e.response.body<ApiData.Error>()
             Result.failure(CustomApiException(errorBody))
         } catch (e: Exception) {
             Result.failure(e)
@@ -67,23 +72,37 @@ class PawsaverApi {
     }
 
     suspend fun login(email: String, password: String): Result<ApiData.Response<SignInResponse>> {
-        return safeApiCall<SignInResponse, SignInError> {
+        return safeApiCall {
             httpClient.post("${BuildKonfig.API_URL}/login") {
                 setBody(SignInBody(email, password))
             }
         }
     }
 
-    suspend fun register(
+    suspend fun registerUser(
         firstName: String,
         lastName: String,
         email: String,
         password: String,
         phone: String
-    ): Result<ApiData.Response<SignUpResponse>> {
-        return safeApiCall<SignUpResponse, SignUpError> {
+    ): Result<ApiData.Response<UserSignUpResponse>> {
+        return safeApiCall {
             httpClient.post("${BuildKonfig.API_URL}/register") {
-                setBody(SignUpBody(firstName, lastName, email, password, phone))
+                setBody(UserSignUpBody(firstName, lastName, email, password, phone))
+            }
+        }
+    }
+
+    suspend fun registerShelter(
+        email: String,
+        name: String,
+        registrationNumber: String,
+        phone: String,
+        password: String,
+    ): Result<ApiData.Response<ShelterSignUpResponse>> {
+        return safeApiCall {
+            httpClient.post("${BuildKonfig.API_URL}/register_shelter") {
+                setBody(ShelterSignUpBody(email, name, registrationNumber, phone, password))
             }
         }
     }
@@ -92,9 +111,42 @@ class PawsaverApi {
         email: String,
         code: String,
     ): Result<ApiData.Response<VerifyEmailResponse>> {
-        return safeApiCall<VerifyEmailResponse, VerifyEmailError> {
+        return safeApiCall {
             httpClient.post("${BuildKonfig.API_URL}/verify") {
                 setBody(VerifyEmailBody(email, code))
+            }
+        }
+    }
+
+    suspend fun forgotPassword(
+        email: String,
+    ): Result<ApiData.Response<ForgotPasswordResponse>> {
+        return safeApiCall {
+            httpClient.post("${BuildKonfig.API_URL}/password-reset") {
+                setBody(ForgotPasswordBody(email))
+            }
+        }
+    }
+
+    suspend fun resetPassword(
+        resetCode: String,
+        encodedPk: String,
+    ): Result<ApiData.Response<ResetPasswordResponse>> {
+        return safeApiCall {
+            httpClient.post("${BuildKonfig.API_URL}/password-reset/verify-code/${encodedPk}") {
+                setBody(ResetPasswordBody(resetCode))
+            }
+        }
+    }
+
+    suspend fun setNewPassword(
+        newPassword: String,
+        encodedPk: String,
+        token: String,
+    ): Result<ApiData.Response<NewPasswordResponse>> {
+        return safeApiCall {
+            httpClient.post("${BuildKonfig.API_URL}/password-reset-confirm/${encodedPk}/${token}") {
+                setBody(NewPasswordBody(newPassword))
             }
         }
     }

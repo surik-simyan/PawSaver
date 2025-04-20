@@ -11,32 +11,41 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.capitalize
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.pawsaver.app.feature.main.ui.HomeScreen
+import kotlinx.serialization.Serializable
 
-sealed class BottomNavRoute(val route: String) {
-    data object Home : BottomNavRoute("home")
-    data object Lost : BottomNavRoute("lost")
-    data object Account : BottomNavRoute("account")
+@Serializable
+sealed class BottomNavRouting(val label: String) {
+    @Serializable
+    data object Home : BottomNavRouting("Home")
+
+    @Serializable
+    data object Lost : BottomNavRouting("Lost")
+
+    @Serializable
+    data object Account : BottomNavRouting("Account")
 }
 
 @Composable
 fun BottomNavHost(navController: NavHostController, modifier: Modifier = Modifier) {
     NavHost(
         navController = navController,
-        startDestination = BottomNavRoute.Home.route,
+        startDestination = BottomNavRouting.Home,
         modifier = modifier
     ) {
-        composable(BottomNavRoute.Home.route) {
+        composable<BottomNavRouting.Home> {
             HomeScreen()
         }
-        composable(BottomNavRoute.Lost.route) {
+        composable<BottomNavRouting.Lost> {
 
         }
-        composable(BottomNavRoute.Account.route) {
+        composable<BottomNavRouting.Account> {
 
         }
     }
@@ -45,34 +54,36 @@ fun BottomNavHost(navController: NavHostController, modifier: Modifier = Modifie
 @Composable
 fun MainBottomNavigationBar(navController: NavHostController) {
     val items = listOf(
-        BottomNavRoute.Home,
-        BottomNavRoute.Lost,
-        BottomNavRoute.Account
+        BottomNavRouting.Home,
+        BottomNavRouting.Lost,
+        BottomNavRouting.Account
     )
 
-    val currentDestination = navController.currentBackStackEntryAsState().value?.destination?.route
+    val currentDestination = navController.currentBackStackEntryAsState().value?.destination
 
     NavigationBar {
         items.forEach { item ->
             NavigationBarItem(
-                selected = currentDestination == item.route,
+                selected = currentDestination?.hierarchy?.any {
+                    it.hasRoute(item::class)
+                } == true,
                 onClick = {
-                    navController.navigate(item.route) {
-                        popUpTo(BottomNavRoute.Home.route) { saveState = true }
+                    navController.navigate(item) {
+                        popUpTo(BottomNavRouting.Home) { saveState = true }
                         launchSingleTop = true
                         restoreState = true
                     }
                 },
-                label = { Text(text = item.route.replaceFirstChar(Char::titlecase)) },
+                label = { Text(text = item.label) },
                 alwaysShowLabel = false,
                 icon = {
                     Icon(
                         imageVector = when (item) {
-                            BottomNavRoute.Home -> Icons.Filled.Home
-                            BottomNavRoute.Lost -> Icons.Filled.Search
-                            BottomNavRoute.Account -> Icons.Filled.AccountCircle
+                            BottomNavRouting.Home -> Icons.Filled.Home
+                            BottomNavRouting.Lost -> Icons.Filled.Search
+                            BottomNavRouting.Account -> Icons.Filled.AccountCircle
                         },
-                        contentDescription = item.route
+                        contentDescription = item.toString()
                     )
                 }
             )
