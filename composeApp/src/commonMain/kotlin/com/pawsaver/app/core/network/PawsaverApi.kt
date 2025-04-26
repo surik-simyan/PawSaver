@@ -7,6 +7,8 @@ import com.pawsaver.app.feature.login.data.ForgotPasswordBody
 import com.pawsaver.app.feature.login.data.ForgotPasswordResponse
 import com.pawsaver.app.feature.login.data.NewPasswordBody
 import com.pawsaver.app.feature.login.data.NewPasswordResponse
+import com.pawsaver.app.feature.login.data.TokenRefreshBody
+import com.pawsaver.app.feature.login.data.TokenRefreshResponse
 import com.pawsaver.app.feature.login.data.ResetPasswordBody
 import com.pawsaver.app.feature.login.data.ResetPasswordResponse
 import com.pawsaver.app.feature.login.data.ShelterSignUpBody
@@ -75,6 +77,14 @@ class PawsaverApi {
         return safeApiCall {
             httpClient.post("${BuildKonfig.API_URL}/login") {
                 setBody(SignInBody(email, password))
+            }
+        }
+    }
+
+    suspend fun refreshToken(token: String): Result<ApiData.Response<TokenRefreshResponse>> {
+        return safeApiCall {
+            httpClient.post("${BuildKonfig.API_URL}/token-refresh") {
+                setBody(TokenRefreshBody(token))
             }
         }
     }

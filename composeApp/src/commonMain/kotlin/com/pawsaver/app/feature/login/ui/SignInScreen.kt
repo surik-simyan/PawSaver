@@ -31,7 +31,6 @@ import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,10 +49,7 @@ import com.pawsaver.app.core.utils.checkFieldErrors
 import com.pawsaver.app.core.utils.inputFieldPaddings
 import com.pawsaver.app.core.utils.koinViewModel
 import com.pawsaver.app.core.utils.toErrorText
-import com.russhwolf.settings.Settings
-import com.russhwolf.settings.get
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
 
 @Composable
 fun SignInScreen(
@@ -64,7 +60,6 @@ fun SignInScreen(
 ) {
     val viewModel = koinViewModel<SignInScreenViewModel>()
     val signInState by viewModel.signInState.collectAsState()
-    val settings: Settings = koinInject<Settings>()
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val email = remember { mutableStateOf("") }
@@ -158,7 +153,7 @@ fun SignInScreen(
             }
 
             Button(
-                onClick = { viewModel.signIn(email.value, password.value) },
+                onClick = { viewModel.signIn(email.value, password.value, rememberMe.value) },
                 modifier = Modifier.fillMaxWidth().padding(16.dp)
             ) {
                 Text("SIGN IN")
@@ -217,11 +212,11 @@ fun SignInScreen(
             }
 
             is SignInScreenViewModel.SignInScreenState.Success -> {
-                if (rememberMe.value) {
-                    val user = (signInState as SignInScreenViewModel.SignInScreenState.Success).user
-                    settings.putString("access", user.access)
-                    settings.putString("refresh", user.refresh)
-                }
+                viewModel.resetState()
+                onNavigateToHomeScreen()
+            }
+
+            is SignInScreenViewModel.SignInScreenState.SuccessToken -> {
                 viewModel.resetState()
                 onNavigateToHomeScreen()
             }

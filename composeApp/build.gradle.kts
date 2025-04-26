@@ -50,7 +50,7 @@ kotlin {
 //            implementation(libs.androidx.datastore)
 //            implementation(libs.androidx.datastore.preferences)
             implementation(libs.multiplatform.settings)
-//            implementation(libs.multiplatform.settings.no.arg)
+            implementation(libs.multiplatform.settings.no.arg)
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
