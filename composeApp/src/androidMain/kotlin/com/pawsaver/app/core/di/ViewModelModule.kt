@@ -7,6 +7,9 @@ import com.pawsaver.app.feature.login.ui.ShelterSignUpScreenViewModel
 import com.pawsaver.app.feature.login.ui.SignInScreenViewModel
 import com.pawsaver.app.feature.login.ui.UserSignUpScreenViewModel
 import com.pawsaver.app.feature.login.ui.VerifyEmailScreenViewModel
+import com.pawsaver.app.feature.main.ui.HomeScreenViewModel
+import com.pawsaver.app.feature.main.ui.LostScreenViewModel
+import com.pawsaver.app.feature.main.ui.ProfileScreenViewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
@@ -18,4 +21,7 @@ actual val viewModelModule = module {
     viewModelOf(::ForgotPasswordScreenViewModel)
     viewModelOf(::ResetPasswordScreenViewModel)
     viewModelOf(::NewPasswordScreenViewModel)
+    viewModelOf(::HomeScreenViewModel)
+    viewModelOf(::LostScreenViewModel)
+    viewModelOf(::ProfileScreenViewModel)
 }

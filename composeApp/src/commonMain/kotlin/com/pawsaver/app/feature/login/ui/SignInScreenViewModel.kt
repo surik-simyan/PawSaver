@@ -39,6 +39,7 @@ class SignInScreenViewModel(
                 pawsaverApi.refreshToken(refreshToken)
                     .onSuccess { response ->
                         Logger.d("Sign-in successful: ${response.data}")
+                        settings.putString("accessToken", response.data.access)
                         settings.putString("refreshToken", response.data.refresh)
                         _signInState.update { SignInScreenState.SuccessToken(response.data) }
                     }
@@ -67,8 +68,9 @@ class SignInScreenViewModel(
             pawsaverApi.login(email, password)
                 .onSuccess { response ->
                     Logger.d("Sign-in successful: ${response.data}")
-                    if (rememberMe) {
+                    if (rememberMe || settings.getStringOrNull("refreshToken") != null) {
                         settings.putString("refreshToken", response.data.refresh)
+                        settings.putString("accessToken", response.data.access)
                     }
                     _signInState.update { SignInScreenState.Success(response.data) }
                 }

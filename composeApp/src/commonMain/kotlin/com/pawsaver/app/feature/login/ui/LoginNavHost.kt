@@ -4,6 +4,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.pawsaver.app.feature.main.MainRouting
 import kotlinx.serialization.Serializable
 
 sealed interface LoginRouting {
@@ -36,7 +37,7 @@ fun NavGraphBuilder.loginRouting(navController: NavHostController) {
             onNavigateToUserSignUp = { navController.navigate(LoginRouting.UserSignUp) },
             onNavigateToShelterSignUp = { navController.navigate(LoginRouting.ShelterSignUp) },
             onNavigateToHomeScreen = {
-                navController.navigate("main") {
+                navController.navigate(MainRouting.Main) {
                     popUpTo(navController.graph.startDestinationId) {
                         inclusive = true
                     }

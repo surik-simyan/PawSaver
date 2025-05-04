@@ -6,5 +6,5 @@ import org.koin.dsl.module
 
 val appModule = module {
     single<Settings> { Settings() }
-    single<PawsaverApi> { PawsaverApi() }
+    single<PawsaverApi> { PawsaverApi(get()) }
 }

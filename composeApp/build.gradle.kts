@@ -19,7 +19,7 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
+
     listOf(
         iosX64(),
         iosArm64(),
@@ -30,16 +30,18 @@ kotlin {
             isStatic = true
         }
     }
-    
+
     sourceSets {
 
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
-//            implementation(libs.androidx.security.crypto)
             implementation(libs.ktor.client.android)
             implementation(libs.koin.android)
             implementation(libs.koin.androidx.compose)
+            implementation(libs.play.services.maps)
+            implementation(libs.play.services.location)
+            implementation(libs.maps.compose)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
@@ -47,11 +49,11 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.navigation.compose)
-//            implementation(libs.androidx.datastore)
-//            implementation(libs.androidx.datastore.preferences)
             implementation(libs.multiplatform.settings)
             implementation(libs.multiplatform.settings.no.arg)
+            implementation(libs.ktor.client.auth)
             implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.logging)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.koin.compose)
@@ -66,6 +68,11 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(libs.touchlab.kermit)
+            implementation(libs.coil.compose)
+            implementation(libs.coil.network.ktor3)
+            implementation(libs.filekit.dialogs)
+            implementation(libs.filekit.dialogs.compose)
+            implementation(libs.filekit.coil)
         }
     }
 }
@@ -87,8 +94,20 @@ android {
         }
     }
     buildTypes {
+        getByName("debug") {
+            resValue(
+                "string",
+                "API_KEY",
+                gradleLocalProperties(rootDir, providers).getProperty("API_KEY")
+            )
+        }
         getByName("release") {
             isMinifyEnabled = false
+            resValue(
+                "string",
+                "API_KEY",
+                gradleLocalProperties(rootDir, providers).getProperty("API_KEY")
+            )
         }
     }
     compileOptions {
@@ -105,7 +124,11 @@ buildkonfig {
     packageName = "com.pawsaver.app"
 
     defaultConfigs {
-        buildConfigField(FieldSpec.Type.STRING, "API_URL", gradleLocalProperties(rootDir, providers).getProperty("API_URL"))
+        buildConfigField(
+            FieldSpec.Type.STRING,
+            "API_URL",
+            gradleLocalProperties(rootDir, providers).getProperty("API_URL")
+        )
     }
 }
 

@@ -14,6 +14,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pawsaver.app.core.data.ApiData
 import org.koin.compose.currentKoinScope
 
+
 @Composable
 fun Modifier.inputFieldPaddings(isSupportingTextEnabled: Boolean = true): Modifier {
     return this.padding(

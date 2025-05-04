@@ -9,15 +9,16 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.capitalize
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.pawsaver.app.feature.main.data.ListingsResponse
 import com.pawsaver.app.feature.main.ui.HomeScreen
+import com.pawsaver.app.feature.main.ui.LostScreen
+import com.pawsaver.app.feature.main.ui.ProfileScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -29,24 +30,28 @@ sealed class BottomNavRouting(val label: String) {
     data object Lost : BottomNavRouting("Lost")
 
     @Serializable
-    data object Account : BottomNavRouting("Account")
+    data object Profile : BottomNavRouting("Profile")
 }
 
 @Composable
-fun BottomNavHost(navController: NavHostController, modifier: Modifier = Modifier) {
+fun BottomNavHost(
+    navController: NavHostController,
+    onNavigateToDetailsScreen: (id: Int) -> Unit,
+    onNavigateToLostDetailsScreen: (id: Int) -> Unit,
+    errorHandler: (String) -> Unit,
+) {
     NavHost(
         navController = navController,
         startDestination = BottomNavRouting.Home,
-        modifier = modifier
     ) {
         composable<BottomNavRouting.Home> {
-            HomeScreen()
+            HomeScreen(onNavigateToDetailsScreen, errorHandler)
         }
         composable<BottomNavRouting.Lost> {
-
+            LostScreen(onNavigateToLostDetailsScreen, errorHandler)
         }
-        composable<BottomNavRouting.Account> {
-
+        composable<BottomNavRouting.Profile> {
+            ProfileScreen(errorHandler)
         }
     }
 }
@@ -56,7 +61,7 @@ fun MainBottomNavigationBar(navController: NavHostController) {
     val items = listOf(
         BottomNavRouting.Home,
         BottomNavRouting.Lost,
-        BottomNavRouting.Account
+        BottomNavRouting.Profile
     )
 
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination
@@ -81,7 +86,7 @@ fun MainBottomNavigationBar(navController: NavHostController) {
                         imageVector = when (item) {
                             BottomNavRouting.Home -> Icons.Filled.Home
                             BottomNavRouting.Lost -> Icons.Filled.Search
-                            BottomNavRouting.Account -> Icons.Filled.AccountCircle
+                            BottomNavRouting.Profile -> Icons.Filled.AccountCircle
                         },
                         contentDescription = item.toString()
                     )

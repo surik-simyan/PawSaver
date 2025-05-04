@@ -33,6 +33,9 @@ sealed class ApiData<T> {
                     message = "An unexpected error occurred"
                 )
             )
+
+        val message: String
+            get() = apiErrors.first().message
     }
 }
 
