@@ -238,7 +238,7 @@ fun HomeScreen(
                                     showTypeDialog = false
                                 }
                             )
-                            Text(type.capitalize())
+                            Text(type.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() })
                         }
                     }
                     Spacer(Modifier.height(8.dp))
@@ -354,7 +354,7 @@ fun HomeScreen(
                                     showGenderDialog = false
                                 }
                             )
-                            Text(gender.capitalize())
+                            Text(gender.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() })
                         }
                     }
                     Spacer(Modifier.height(8.dp))

@@ -7,7 +7,6 @@ import com.pawsaver.app.core.data.ApiData
 import com.pawsaver.app.core.data.CustomApiException
 import com.pawsaver.app.core.network.PawsaverApi
 import com.pawsaver.app.feature.login.data.NewPasswordResponse
-import com.pawsaver.app.feature.login.data.UserSignUpResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update

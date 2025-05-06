@@ -15,7 +15,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.pawsaver.app.feature.main.data.ListingsResponse
 import com.pawsaver.app.feature.main.ui.HomeScreen
 import com.pawsaver.app.feature.main.ui.LostScreen
 import com.pawsaver.app.feature.main.ui.ProfileScreen

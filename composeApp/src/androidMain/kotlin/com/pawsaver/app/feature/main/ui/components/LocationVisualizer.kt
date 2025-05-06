@@ -4,6 +4,7 @@ import android.view.MotionEvent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInteropFilter
@@ -50,7 +51,7 @@ actual fun LocationVisualizer(
         cameraPositionState = cameraPositionState
     ) {
         Marker(
-            state = MarkerState(position = currentLocation),
+            state = remember { MarkerState(position = currentLocation) },
             title = title
         )
     }

@@ -6,7 +6,6 @@ import co.touchlab.kermit.Logger
 import com.pawsaver.app.core.data.ApiData
 import com.pawsaver.app.core.data.CustomApiException
 import com.pawsaver.app.core.network.PawsaverApi
-import com.pawsaver.app.feature.main.data.ListingsResponse
 import com.pawsaver.app.feature.main.data.ProfileResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
