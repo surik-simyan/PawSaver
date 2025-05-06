@@ -32,47 +32,48 @@ kotlin {
     }
 
     sourceSets {
-
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
-            implementation(libs.ktor.client.android)
             implementation(libs.koin.android)
             implementation(libs.koin.androidx.compose)
-            implementation(libs.play.services.maps)
-            implementation(libs.play.services.location)
+            implementation(libs.ktor.client.android)
             implementation(libs.maps.compose)
+            implementation(libs.play.services.location)
+            implementation(libs.play.services.maps)
         }
+
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
         }
+
         commonMain.dependencies {
-            implementation(libs.androidx.lifecycle.viewmodel)
-            implementation(libs.androidx.navigation.compose)
-            implementation(libs.multiplatform.settings)
-            implementation(libs.multiplatform.settings.no.arg)
-            implementation(libs.ktor.client.auth)
-            implementation(libs.ktor.client.core)
-            implementation(libs.ktor.client.logging)
-            implementation(libs.ktor.client.content.negotiation)
-            implementation(libs.ktor.serialization.kotlinx.json)
-            implementation(libs.koin.compose)
             api(libs.koin.core)
-            implementation(libs.kotlinx.serialization)
-            implementation(libs.kotlinx.datetime)
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.ui)
-            implementation(compose.materialIconsExtended)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
-            implementation(libs.touchlab.kermit)
+            implementation(compose.foundation)
+            implementation(compose.material3)
+            implementation(compose.materialIconsExtended)
+            implementation(compose.runtime)
+            implementation(compose.ui)
+            implementation(libs.androidx.lifecycle.viewmodel)
+            implementation(libs.androidx.navigation.compose)
             implementation(libs.coil.compose)
             implementation(libs.coil.network.ktor3)
+            implementation(libs.filekit.coil)
             implementation(libs.filekit.dialogs)
             implementation(libs.filekit.dialogs.compose)
-            implementation(libs.filekit.coil)
+            implementation(libs.koin.compose)
+            implementation(libs.kotlinx.datetime)
+            implementation(libs.kotlinx.serialization)
+            implementation(libs.ktor.client.auth)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.logging)
+            implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.multiplatform.settings)
+            implementation(libs.multiplatform.settings.no.arg)
+            implementation(libs.touchlab.kermit)
         }
     }
 }
